@@ -101,36 +101,50 @@ async function loadTest() {
 
 // НОВЫЙ ПАРСЕР
 function parseQuestions(text) {
-    const lines = text.split('\n').map(l => l.trim()).filter(l => l);
-    const questions = [];
+    const lines = text.split('\n')
+        .map(l => l.trim())
+        .filter(l => l.length > 0);
 
+    const questions = [];
     let currentQuestion = null;
 
     lines.forEach(line => {
+
+        // новый вопрос (1. ...)
         if (/^\d+\./.test(line)) {
-            if (currentQuestion) questions.push(currentQuestion);
+            if (currentQuestion) {
+                questions.push(currentQuestion);
+            }
 
             currentQuestion = {
                 question: line.replace(/^\d+\.\s*/, ''),
                 answers: []
             };
         }
-        else if (line.startsWith('-')) {
-            const isCorrect = line.endsWith('+');
+
+        // вариант ответа
+        else if (line.startsWith('-') || line.startsWith('–')) {
+
+            // проверка правильного (+ в конце даже с пробелами)
+            const isCorrect = /\+\s*$/.test(line);
 
             const clean = line
-                .replace(/^-/, '')
-                .replace('+', '')
+                .replace(/^[-–]\s*/, '')   // убрать - или –
+                .replace(/\+\s*$/, '')    // убрать + в конце
                 .trim();
 
-            currentQuestion.answers.push({
-                text: clean,
-                correct: isCorrect
-            });
+            if (currentQuestion) {
+                currentQuestion.answers.push({
+                    text: clean,
+                    correct: isCorrect
+                });
+            }
         }
     });
 
-    if (currentQuestion) questions.push(currentQuestion);
+    if (currentQuestion) {
+        questions.push(currentQuestion);
+    }
 
     return questions;
 }
