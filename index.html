@@ -150,13 +150,13 @@ function parseQuestions(text) {
 
         else if (line.startsWith('-') || line.startsWith('–')) {
 
-            const isCorrect = /\+\s*$/.test(line);
+            const isCorrect = line.includes('+');
 
-            const clean = line
-                .replace(/^[-–]\s*/, '')
-                .replace(/\+\s*$/, '')
-                .trim();
-
+                const clean = line
+                    .replace(/^[-–]\s*/, '')
+                    .replace('+', '')
+                    .trim();
+            
             if (currentQuestion) {
                 currentQuestion.answers.push({
                     text: clean,
