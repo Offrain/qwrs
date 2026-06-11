@@ -139,24 +139,32 @@ function parseQuestions(text) {
 
     lines.forEach(line => {
 
-        if (/^\d+\./.test(line)) {
+        // ✅ ВОПРОС: теперь поддержка "1." И "?"
+        if (/^\d+\./.test(line) || line.startsWith('?')) {
+
             if (currentQuestion) questions.push(currentQuestion);
 
             currentQuestion = {
-                question: line.replace(/^\d+\.\s*/, ''),
+                question: line
+                    .replace(/^\d+\.\s*/, '') // убираем "1."
+                    .replace(/^\?\s*/, ''),  // убираем "?"
                 answers: []
             };
         }
 
-        else if (line.startsWith('-') || line.startsWith('–')) {
+        // ✅ ОТВЕТЫ: теперь + в начале
+        else if (
+            line.startsWith('-') ||
+            line.startsWith('–') ||
+            line.startsWith('+')
+        ) {
 
-            const isCorrect = line.includes('+');
+            const isCorrect = line.startsWith('+');
 
-                const clean = line
-                    .replace(/^[-–]\s*/, '')
-                    .replace('+', '')
-                    .trim();
-            
+            const clean = line
+                .replace(/^[-–+]\s*/, '')
+                .trim();
+
             if (currentQuestion) {
                 currentQuestion.answers.push({
                     text: clean,
@@ -170,7 +178,7 @@ function parseQuestions(text) {
 
     return questions;
 }
-
+    
 // render
 function renderPage(page) {
     const quiz = document.getElementById('quiz');
